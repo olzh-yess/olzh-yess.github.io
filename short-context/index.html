@@ -1,229 +1,728 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Context Recovery Snapshot</title>
-  <style>
-    /* Basic styling for a "Notion-like" feel */
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
-                   "Open Sans", "Helvetica Neue", sans-serif;
-      margin: 0;
-      padding: 1rem;
-      background-color: #fafafa;
-      line-height: 1.5;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context Recovery - Timeline Interface</title>
+    <style>
+        :root {
+            --bg-color: #f0ede8;
+            --text-color: #1a1a1a;
+            --green: #59ab7d;
+            --blue: #4a90b0;
+            --orange: #cb9344;
+            --red: #c14d49;
+            --light-gray: #dbd7d0;
+            --dark-gray: #333333;
+            --gradient-start: #59ab7d;
+            --gradient-middle: #cb9344;
+            --gradient-end: #4a90b0;
+        }
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 1rem;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
 
-    /* Section styling */
-    .section {
-      margin-bottom: 2rem;
-    }
-    .section h2 {
-      margin-top: 0;
-      margin-bottom: 0.25rem;
-      font-size: 1.25rem;
-    }
-    .section p.section-desc {
-      margin-top: 0;
-      margin-bottom: 1rem;
-      color: #666;
-    }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 0;
+            line-height: 1.6;
+            position: relative;
+        }
 
-    /* Sub-section styling */
-    .sub-section {
-      margin-left: 1.5rem;
-      margin-bottom: 1rem;
-    }
-    .sub-section h3 {
-      margin-top: 1rem;
-      margin-bottom: 0.5rem;
-      font-size: 1.15rem;
-    }
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/png;base64,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");
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 1;
+        }
 
-    /* Task lists, bullet points */
-    .task-list {
-      list-style: none;
-      padding-left: 0;
-    }
-    .task-list li {
-      margin: 0.25rem 0;
-      display: flex;
-      align-items: flex-start;
-    }
-    .task-list li::before {
-      content: "•";
-      color: #8b8b8b;
-      margin-right: 0.5rem;
-    }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            position: relative;
+            z-index: 2;
+        }
 
-    /* "High-Impact Next Steps" callouts */
-    .callout {
-    background-color: #e5e7eb; /* Cool Gray */
-    border-left: 4px solid #0f172a; /* Deep Navy */
+        header {
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--light-gray);
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
 
-      padding: 0.75rem;
-      margin: 0.75rem 0;
-      border-radius: 4px;
-    }
-    .callout strong {
-      display: block;
-      margin-bottom: 0.5rem;
-    }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
 
-    /* Time references or short highlights */
-    .time-ref {
-      color: #999;
-      font-size: 0.9rem;
-      margin-left: 0.5rem;
-    }
-    .badge {
-      display: inline-block;
-      margin-left: 0.5rem;
-      padding: 0.15rem 0.5rem;
-      font-size: 0.75rem;
-      background-color: #ebf4ff;
-      color: #1d4ed8;
-      border-radius: 3px;
-    }
-  </style>
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-symbol {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--dark-gray);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-symbol::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-middle), var(--gradient-end));
+            opacity: 0.3;
+        }
+
+        .meta-icons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .meta-icon {
+            width: 24px;
+            height: 24px;
+            opacity: 0.7;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.03em;
+            text-transform: lowercase;
+        }
+
+        .project-info {
+            padding: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.03);
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #444;
+            line-height: 1.5;
+            border-left: 4px solid #333;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+            padding-bottom: 0.5rem;
+        }
+
+        .date {
+            font-weight: 600;
+        }
+
+        .direction {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .direction span {
+            font-size: 0.9rem;
+        }
+
+        .arrow {
+            width: 20px;
+            height: 1px;
+            background-color: var(--dark-gray);
+            position: relative;
+        }
+
+        .arrow:after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -3px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid var(--dark-gray);
+            border-top: 3px solid transparent;
+            border-bottom: 3px solid transparent;
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .time-marker {
+            position: absolute;
+            left: 0;
+            top: 1.5rem;
+            background: var(--bg-color);
+            padding: 0.2rem 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid var(--light-gray);
+            border-radius: 4px;
+            z-index: 1;
+        }
+
+        .time-marker::after {
+            content: "";
+            position: absolute;
+            height: 5px;
+            width: 5px;
+            background-color: var(--dark-gray);
+            border-radius: 50%;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-left: 0.5rem;
+        }
+
+        .activity-block {
+            position: relative;
+            padding-left: 5rem;
+            margin-left: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .activity-block::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 2.5rem;
+            width: 1px;
+            background-color: #ddd;
+            z-index: 0;
+        }
+
+        .activity-content {
+            padding: 1.5rem;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-title-text {
+            flex-grow: 1;
+        }
+
+        .activity-app {
+            background-color: rgba(0, 0, 0, 0.06);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .activity-description {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .activity-details {
+            background-color: rgba(0, 0, 0, 0.03);
+            border-radius: 6px;
+            padding: 1rem;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .resources {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .resource-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            text-decoration: none;
+            color: var(--dark-gray);
+            transition: all 0.2s ease;
+        }
+
+        .resource-link:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .resource-icon {
+            width: 12px;
+            height: 12px;
+            opacity: 0.7;
+        }
+
+        .activity-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .duration {
+            font-weight: 500;
+        }
+
+        .category {
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-weight: 500;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Category styling */
+        .llm {
+            background-color: var(--orange);
+            color: white;
+        }
+
+        .academic {
+            background-color: var(--green);
+            color: white;
+        }
+
+        .recovery {
+            background-color: var(--blue);
+            color: white;
+        }
+
+        .news {
+            background-color: var(--red);
+            color: white;
+        }
+
+        /* Activity backgrounds */
+        .bg-llm {
+            background-color: rgba(203, 147, 68, 0.07);
+            border-left: 3px solid var(--orange);
+        }
+
+        .bg-academic {
+            background-color: rgba(89, 171, 125, 0.07);
+            border-left: 3px solid var(--green);
+        }
+
+        .bg-recovery {
+            background-color: rgba(74, 144, 176, 0.07);
+            border-left: 3px solid var(--blue);
+        }
+
+        .bg-news {
+            background-color: rgba(193, 77, 73, 0.07);
+            border-left: 3px solid var(--red);
+        }
+
+        .gradient-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-middle), var(--gradient-end));
+            margin: 3rem auto;
+            position: relative;
+        }
+
+        .gradient-dot::after {
+            content: "";
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--light-gray);
+            font-size: 0.9rem;
+            color: #666;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .reference-id {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.7rem;
+            opacity: 0.5;
+            letter-spacing: 0.05em;
+        }
+
+        .project-info {
+            max-width: 500px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .activity-block {
+                padding-left: 4rem;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="reference-id">A-024445-02</div>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <div class="logo">
+                    <div class="logo-symbol">CR</div>
+                    <h1>context recovery</h1>
+                </div>
+                <div class="meta-icons">
+                    <div class="meta-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="meta-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z" stroke="currentColor" stroke-width="2"/>
+                            <path d="M2 12H22" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
 
-<div class="container">
+            <div class="project-info">
+                <strong>Context Recovery Project</strong> explores how LLMs can help people with task resumption by reactivating mental context (reconstructed from computer-activity logs). This project aims to reduce the cognitive effort to "reload" complex work—potentially addressing procrastination while reducing reliance on user motivation.
+            </div>
+        </header>
 
-  <!-- 1. CONTEXT RECOVERY & SNAPSHOT DESIGN -->
-  <div class="section">
-    <h2>🚀 1. Context Recovery & Snapshot Design</h2>
-    <p class="section-desc">
-      All entries referencing “Context Recovery - 4o designing the snapshot,” your logs,
-      or creating a user-facing snapshot.
-    </p>
+        <div class="timeline-header">
+            <div class="date">February 12, 2025</div>
+            <div class="direction">
+                <span>TIMELINE</span>
+                <div class="arrow"></div>
+            </div>
+        </div>
 
-    <!-- 2.1 Designing the Snapshot (ChatGPT & Real-Time Editors) -->
-    <div class="sub-section">
-      <h3>2.1 Designing the Snapshot (ChatGPT & Real-Time Editors)</h3>
-      <p><strong>Done / In Progress</strong></p>
-      <ul class="task-list">
-        <li>Collaborated with ChatGPT to design the snapshot
-          <span class="time-ref">(15:30–19:40 range)</span>
-          <span class="badge">Context Recovery - 4o designing the snapshot</span>
-        </li>
-        <li>Tested the snapshot design in an online editor
-          <span class="time-ref">(17:40, 18:20, 18:30–19:00)</span>
-          <span class="badge">Real-time HTML Editor</span>
-        </li>
-      </ul>
+        <div class="timeline">
+            <!-- LLM Text Interface - Initial Session -->
+            <div class="activity-block">
+                <div class="time-marker">00:00</div>
+                <div class="activity-content bg-llm">
+                    <div class="activity-title">
+                        <div class="activity-title-text">LLM Text Interface - Initial Session</div>
+                        <div class="activity-app">chatgpt.com</div>
+                    </div>
+                    <div class="activity-description">
+                        Late night exploration of using LLMs as state managers for text interfaces. Experimenting with how language models can maintain context while providing adaptable command-line style interactions.
+                    </div>
+                    <div class="activity-details">
+                        <strong>Key Concept:</strong> "little-api" - A terminal-like experience powered by AI that maintains stateful interactions while providing adaptable command-line style functionality.
+                    </div>
+                    <div class="resources">
+                        <a href="#" class="resource-link">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 12V3M12 3L9 6M12 3L15 6" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Session Notes
+                        </a>
+                        <a href="#" class="resource-link">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 7C3 5.89543 3.89543 5 5 5H19C20.1046 5 21 5.89543 21 7V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V7Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M8 12H16M8 8H16M8 16H12" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            ChatGPT Thread
+                        </a>
+                    </div>
+                    <div class="activity-meta">
+                        <span class="duration">Duration: 1h 40m</span>
+                        <span class="category llm">LLM Text Interface</span>
+                    </div>
+                </div>
+            </div>
 
-      <div class="callout">
-        <strong>High-Impact Next Steps</strong>
-        <ul>
-          <li>Consolidate Findings into a Single Prototype: Merge the text-based timeline idea with a simple interactive “resume from here” interface.</li>
-          <li>Gather User Feedback: Possibly share the snapshot mockup with a friend/colleague for quick impressions.</li>
-          <li>Design Variation: Experiment with a “task board” or “project-based summary” format (like a Trello or Notion style).</li>
-        </ul>
-      </div>
+            <!-- Academic Responsibilities -->
+            <div class="activity-block">
+                <div class="time-marker">10:30</div>
+                <div class="activity-content bg-academic">
+                    <div class="activity-title">
+                        <div class="activity-title-text">Cornell Academic Activities</div>
+                        <div class="activity-app">canvas.cornell.edu</div>
+                    </div>
+                    <div class="activity-description">
+                        Attending INFO 7905 PhD Professionalization Seminar at Cornell. Participating in discussions about academic career development while simultaneously managing emails about fellowship applications.
+                    </div>
+                    <div class="activity-details">
+                        <strong>Multitasking between:</strong> Zoom meeting, Canvas course materials, email management, and background research on seminar topics.
+                    </div>
+                    <div class="resources">
+                        <a href="#" class="resource-link">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 7C3 5.89543 3.89543 5 5 5H19C20.1046 5 21 5.89543 21 7V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V7Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M8 12H16M8 8H16M8 16H12" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            SP25_IS_INFO7905_Koenecke.pdf
+                        </a>
+                        <a href="#" class="resource-link">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 16V12M12 8H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Zoom Meeting
+                        </a>
+                        <a href="#" class="resource-link">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 8L10.8906 13.2604C11.5624 13.7083 12.4376 13.7083 13.1094 13.2604L21 8M5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19Z" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Cornell Mail
+                        </a>
+                    </div>
+                    <div class="activity-meta">
+                        <span class="duration">Duration: 1h 30m</span>
+                        <span class="category academic">Academic</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LLM Text Interface - Deep Work -->
+            <div class="activity-block">
+                <div class="time-marker">14:30</div>
+                <div class="activity-content bg-llm">
+                    <div class="activity-title">
+                        <div class="activity-title-text">LLM for Adaptable Text Interfaces</div>
+                        <div class="activity-app">multiple apps</div>
+                    </div>
+                    <div class="activity-description">
+                        Deep work session refining the 'little-api' concept. Researching existing frameworks and developing documentation for an LLM-powered text interface.
+                    </div>
+                    <div class="activity-details">
+                        <strong>Research Focus:</strong> Exploring how conversational AI can dynamically generate UI elements based on user context and needs. Creating examples of text-based 'functions' that users could invoke through natural language.
+                        <br><br>
+                        <strong>Key Resources Reviewed:</strong> MemGPT framework (now Letta), shell-ask GitHub repo, llm-term CLI tool, academic papers on text interfaces.
+                    </div>
+                    <div class="resources">
+                        <a href="https://github.com/letta-ai/letta" class="resource-link" target="_blank">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 11V17M12 7H12.01" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Letta (formerly MemGPT)
+                        </a>
+                        <a href="https://github.com/egoist/shell-ask" class="resource-link" target="_blank">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 11V17M12 7H12.01" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            shell-ask
+                        </a>
+                        <a href="https://github.com/dh1011/llm-term" class="resource-link" target="_blank">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 11V17M12 7H12.01" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            llm-term
+                        </a>
+                        <a href="https://dl.acm.org/doi/pdf/10.1145/3332165.3347932" class="resource-link" target="_blank">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 12V3M12 3L9 6M12 3L15 6" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            ACM Paper
+                        </a>
+                    </div>
+                    <div class="activity-meta">
+                        <span class="duration">Duration: 2h 10m</span>
+                        <span class="category llm">LLM Text Interface</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Reading -->
+            <div class="activity-block">
+                <div class="time-marker">16:50</div>
+                <div class="activity-content bg-academic">
+                    <div class="activity-title">
+                        <div class="activity-title-text">Academic Reading</div>
+                        <div class="activity-app">dl.acm.org</div>
+                    </div>
+                    <div class="activity-description">
+                        Literature review of relevant HCI papers on text interfaces and microproductivity. Building academic knowledge base for upcoming projects.
+                    </div>
+                    <div class="activity-details">
+                        <strong>Research Focus:</strong> Understanding the theoretical foundations for text-based interactions and how they might be enhanced through AI assistance.
+                    </div>
+                    <div class="resources">
+                        <a href="#" class="resource-link">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 12V3M12 3L9 6M12 3L15 6" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            ACM Publication
+                        </a>
+                        <a href="#" class="resource-link">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 8V20.4C21 20.7314 20.7314 21 20.4 21H3.6C3.26863 21 3 20.7314 3 20.4V8" stroke="currentColor" stroke-width="2"/>
+                                <path d="M22 10H2" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 7L12 21" stroke="currentColor" stroke-width="2"/>
+                                <path d="M15.5 3H8.5C8.5 3 8 4 8 5C8 6 8.5 7 8.5 7H15.5C15.5 7 16 6 16 5C16 4 15.5 3 15.5 3Z" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Microproductivity
+                        </a>
+                    </div>
+                    <div class="activity-meta">
+                        <span class="duration">Duration: 40m</span>
+                        <span class="category academic">Academic</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interruption Recovery Research - Initial Phase -->
+            <div class="activity-block">
+                <div class="time-marker">17:10</div>
+                <div class="activity-content bg-recovery">
+                    <div class="activity-title">
+                        <div class="activity-title-text">Context Recovery - Initial Phase</div>
+                        <div class="activity-app">chatgpt.com</div>
+                    </div>
+                    <div class="activity-description">
+                        Beginning research on using LLMs to help users recover context after interruptions. Exploring theories of memory, task resumption, and cognitive load.
+                    </div>
+                    <div class="activity-details">
+                        <strong>Project Goals:</strong> Developing approaches for reconstructing a user's mental context from computer activity logs. Early conceptualization of how AI might reduce the friction of returning to complex work.
+                        <br><br>
+                        <strong>Key Research Areas:</strong> Memory theories, goal-setting theory, cognitive reactivation, task resumption lag.
+                    </div>
+                    <div class="resources">
+                        <a href="https://hci.ucsd.edu/hollan/Pubs/HCII-Cangiano-Hollan.pdf" class="resource-link" target="_blank">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 12V3M12 3L9 6M12 3L15 6" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Cangiano & Hollan
+                        </a>
+                        <a href="https://dl.acm.org/doi/pdf/10.1145/3313831.3376753" class="resource-link" target="_blank">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 12V3M12 3L9 6M12 3L15 6" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            CHI Paper
+                        </a>
+                        <a href="https://research.google/pubs/youpivot-improving-recall-with-contextual-search/" class="resource-link" target="_blank">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 11V17M12 7H12.01" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            YouPivot
+                        </a>
+                        <a href="https://pmc.ncbi.nlm.nih.gov/" class="resource-link" target="_blank">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 12V3M12 3L9 6M12 3L15 6" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Neuroscience of Goals
+                        </a>
+                    </div>
+                    <div class="activity-meta">
+                        <span class="duration">Duration: 2h 40m</span>
+                        <span class="category recovery">Interruption Recovery</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interruption Recovery Research - Deep Dive -->
+            <div class="activity-block">
+                <div class="time-marker">20:20</div>
+                <div class="activity-content bg-recovery">
+                    <div class="activity-title">
+                        <div class="activity-title-text">EigenGPT - Interruption Recovery</div>
+                        <div class="activity-app">multiple apps</div>
+                    </div>
+                    <div class="activity-description">
+                        Focused session developing a prototype for the interruption recovery concept, named "EigenGPT".
+                    </div>
+                    <div class="activity-details">
+                        <strong>Development Work:</strong> Creating Python scripts to analyze activity data and using ChatGPT in an experimental mode to test context reconstruction from fragmented information.
+                        <br><br>
+                        <strong>Theoretical Applications:</strong> Implementing theories about memory cues and cognitive reactivation into practical tools. Testing on real activity data from ActivityWatch.
+                    </div>
+                    <div class="resources">
+                        <a href="#" class="resource-link">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V9M13 2L20 9M13 2V9H20" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            stuff.py
+                        </a>
+                        <a href="#" class="resource-link">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V9M13 2L20 9M13 2V9H20" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            desc.md
+                        </a>
+                        <a href="http://localhost:5600" class="resource-link" target="_blank">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2Z" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 11V17M12 7H12.01" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            ActivityWatch
+                        </a>
+                        <a href="#" class="resource-link">
+                            <svg class="resource-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 7C3 5.89543 3.89543 5 5 5H19C20.1046 5 21 5.89543 21 7V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V7Z" stroke="currentColor" stroke
+        </div>
+
+        <div class="gradient-dot"></div>
+
+        <footer>
+            <div class="copyright">© 2025</div>
+        </footer>
     </div>
-
-    <!-- 2.2 Researching Papers for Context Recovery -->
-    <div class="sub-section">
-      <h3>2.2 Researching Papers for Context Recovery</h3>
-      <p><strong>Done / In Progress</strong></p>
-      <ul class="task-list">
-        <li>Checked references on dl.acm.org, Google Scholar
-          <span class="time-ref">(19:30–19:40)</span>
-          <span class="badge">“contextual web history”, “task resumption”</span>
-        </li>
-        <li>Reviewed user interruption/resumption patterns
-          <span class="badge">“TaskSnap”, “ScreenTrack”</span>
-        </li>
-        <li>Explored older citations for “faster task reorientation”
-          <span class="badge">ics.uci.edu/~gmark/CHI2005.pdf</span>
-        </li>
-      </ul>
-
-      <div class="callout">
-        <strong>High-Impact Next Steps</strong>
-        <ul>
-          <li>Annotated Reading: Create notes or highlights summarizing the main findings from each PDF.</li>
-          <li>Literature Matrix: Keep a simple table with columns for paper title, context cues studied, results, next steps.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- 2. PRODUCTIVITY TOOLS -->
-  <div class="section">
-    <h2>🗂 2. Productivity Tools</h2>
-    <p class="section-desc">
-      References to “Executive func - Task Prioritization Plan” and personal productivity apps.
-    </p>
-
-    <!-- 3.1 Task Prioritization & Planning -->
-    <div class="sub-section">
-      <h3>3.1 Task Prioritization & Planning</h3>
-      <p><strong>Done / In Progress</strong></p>
-      <ul class="task-list">
-        <li>Created/used <em>Executive func - Task Prioritization Plan</em> in ChatGPT
-          <span class="time-ref">(15:40–16:30)</span>
-        </li>
-        <li>Managed tasks in <strong>Things</strong>
-          <span class="time-ref">(14:50, 15:00, 15:10)</span> and tested <strong>Opal</strong> for distraction blocking
-          <span class="time-ref">(14:30–14:40)</span>
-        </li>
-        <li>Used “Anytime” and “Today” lists in Things for scheduling
-          <span class="time-ref">(14:50–15:10)</span>
-        </li>
-      </ul>
-
-      <div class="callout">
-        <strong>High-Impact Next Steps</strong>
-        <ul>
-          <li>Refine a Single Source of Truth: Decide whether Things, <code>today.md</code>, or the “Everydays” folder is the main place for tasks.</li>
-          <li>Integrate Opal or Alternative Tools: Evaluate how well Opal is working or consider an alternative.</li>
-          <li>Create a Weekly Review Template: Summarize each week’s tasks and plan next steps in an overview doc or folder.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3. INTUITIVE TIME REPRESENTATION RESEARCH -->
-  <div class="section">
-    <h2>⏳ 3. Intuitive Time Representation Research</h2>
-    <p class="section-desc">
-      Mentioned as “Intuitive Time Representation Research” in ChatGPT logs.
-    </p>
-
-    <!-- 4.1 Approaches to Timeline Visualization -->
-    <div class="sub-section">
-      <h3>4.1 Approaches to Timeline Visualization</h3>
-      <p><strong>Done / In Progress</strong></p>
-      <ul class="task-list">
-        <li>Investigated ways to represent tasks/time in a more intuitive manner
-          <span class="time-ref">(19:20–19:40)</span>
-        </li>
-        <li>Looked at multiple research PDFs on timeline-based summarization or activity logging.</li>
-      </ul>
-
-      <div class="callout">
-        <strong>High-Impact Next Steps</strong>
-        <ul>
-          <li>Proof-of-Concept Visualization: Use <code>three.js</code> or a simple web-based timeline library to generate an interactive timeline from your CSV logs.</li>
-          <li>User Testing: Check if a more visual approach helps recall tasks faster vs. a text-based snapshot.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-</div>
-
 </body>
 </html>
